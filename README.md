@@ -1,4 +1,4 @@
-Lightweight WordPress container with Nginx & PHP-FPM 8.2 based on Alpine Linux.
+Lightweight WordPress container with Nginx & PHP-FPM 8.3 based on Alpine Linux.
 
 Uses MariaDB 11 and Valkey 8, both connected via unix sockets. Cache is set up automatically with W3 Total Cache if using the default `docker-compose.yml` file.
 
