@@ -136,31 +136,32 @@ if [ "$REDIS_HOST" ] && [[ ! -f "/usr/src/wordpress/.w3tc-configured" ]]; then
   if wp --path=/usr/src/wordpress plugin --skip-themes is-active litespeed-cache; then
     wp --path=/usr/src/wordpress plugin --skip-themes --uninstall deactivate litespeed-cache
   fi
-  if wp --path=/usr/src/wordpress plugin --skip-themes is-active w3-total-cache; then
-    echo "Updating cache options..."
-    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set dbcache.engine "redis"
-    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set objectcache.engine "redis"
-    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set pgcache.engine "redis"
-
-    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set dbcache.redis.servers "$REDIS_HOST" --type=array
-    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set objectcache.redis.servers "$REDIS_HOST" --type=array
-    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set pgcache.redis.servers "$REDIS_HOST" --type=array
-
-    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set dbcache.enabled true --type=boolean
-    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set objectcache.enabled true --type=boolean
-    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set pgcache.enabled true --type=boolean
-    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set browsercache.enabled true --type=boolean
-    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set browsercache.html.expires true --type=boolean
-    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set browsercache.html.cache.control true --type=boolean
-
-    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set pgcache.lifetime 186400 --type=integer
-    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set browsercache.html.lifetime 180 --type=integer
-
-    # add file to prevent this from running again
-    touch /usr/src/wordpress/.w3tc-configured
-    # fix permissions
-    chown -R nobody: /usr/src/wordpress/
+  if [ ! "$(ls -A "/usr/src/wordpress/wp-content/plugins/w3-total-cache" 2>/dev/null)" ]; then
+    wp --path=/usr/src/wordpress plugin --skip-themes install --activate w3-total-cache
   fi
+  echo "Updating cache options..."
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set dbcache.engine "redis"
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set objectcache.engine "redis"
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set pgcache.engine "redis"
+
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set dbcache.redis.servers "$REDIS_HOST" --type=array
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set objectcache.redis.servers "$REDIS_HOST" --type=array
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set pgcache.redis.servers "$REDIS_HOST" --type=array
+
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set dbcache.enabled true --type=boolean
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set objectcache.enabled true --type=boolean
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set pgcache.enabled true --type=boolean
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set browsercache.enabled true --type=boolean
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set browsercache.html.expires true --type=boolean
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set browsercache.html.cache.control true --type=boolean
+
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set pgcache.lifetime 186400 --type=integer
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set browsercache.html.lifetime 180 --type=integer
+
+  # add file to prevent this from running again
+  touch /usr/src/wordpress/.w3tc-configured
+  # fix permissions
+  chown -R nobody: /usr/src/wordpress/
 fi
 
 # handle cron
