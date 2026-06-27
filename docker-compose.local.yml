@@ -5,7 +5,6 @@ volumes:
 services:
   coolify-wordpress:
     container_name: coolify-wordpress 
-    # image: 'ghcr.io/boost-creative/coolify-wordpress-8'
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,7 +13,7 @@ services:
     cpus: ${WP_CPU_LIMIT:-2}
     depends_on:
       - coolify-wordpress-db
-      - coolify-wordpress-valkey
+      # - coolify-wordpress-valkey
     volumes:
       - './wordpress:/usr/src/wordpress'
       - './db:/var/db'
@@ -30,8 +29,8 @@ services:
       REDIS_HOST: /tmp/sock/valkey.sock
       # ADDITIONAL_PLUGINS: 'w3-total-cache fluent-smtp better-wp-security simple-cloudflare-turnstile'
       CRON: |
-        * * * * * touch /usr/src/wordpress/hello-world
         */30 * * * * sleep $(tr -dc 0-9 < /dev/urandom | head -c2) && wp db export --path=/usr/src/wordpress /var/db/wp.sql
+
   coolify-wordpress-db:
     container_name: coolify-wordpress-mariadb
     image: 'yobasystems/alpine-mariadb:11'
@@ -47,11 +46,12 @@ services:
       - 'db:/var/lib/mysql'
       - './config/my.cnf:/etc/my.cnf'
       - './config/db-entrypoint.sh:/scripts/run.sh'
-  coolify-wordpress-valkey:
-    container_name: coolify-wordpress-valkey
-    image: 'valkey/valkey:8-alpine'
-    # restart: unless-stopped
-    command: sh -c "mkdir -p /tmp/sock && rm -f /tmp/sock/valkey.sock && valkey-server /usr/local/etc/valkey/valkey.conf"
-    volumes:
-      - './config/valkey.conf:/usr/local/etc/valkey/valkey.conf'
-      - 'sock:/tmp/sock'
+
+  # coolify-wordpress-valkey:
+  #   container_name: coolify-wordpress-valkey
+  #   image: 'valkey/valkey:8-alpine'
+  #   # restart: unless-stopped
+  #   command: sh -c "mkdir -p /tmp/sock && rm -f /tmp/sock/valkey.sock && valkey-server /usr/local/etc/valkey/valkey.conf"
+  #   volumes:
+  #     - './config/valkey.conf:/usr/local/etc/valkey/valkey.conf'
+  #     - 'sock:/tmp/sock'

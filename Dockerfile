@@ -33,6 +33,7 @@ RUN apk --no-cache add \
   php83-soap \
   php83-pdo \
   php83-sqlite3 \
+  php83-pecl-apcu \
   mariadb-client \
   nginx \
   supervisor \

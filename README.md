@@ -1,8 +1,8 @@
 Lightweight WordPress container with Nginx & PHP-FPM 8.3 based on Alpine Linux.
 
-Uses MariaDB 11 and Valkey 8, both connected via unix sockets. Cache is set up automatically with W3 Total Cache if using the default `docker-compose.yml` file.
+Uses MariaDB 11 connected via unix socket. Cache is set up automatically with W3 Total Cache if using the default `docker-compose.yml` file.
 
-This is meant to be easy to deploy with Coolify (using Caddy proxy) and uses Coolify's automatically generated env vars to configure credentials. However it can be modified to run without Coolify.
+This is meant to be easy to deploy with Coolify (using Caddy proxy) and uses Coolify's automatically generated env vars to configure credentials. However it can be used without Coolify.
 
 - May use existing wordpress files (installs fresh copy if no files found)
 - Healthcheck runs wp-cron (disabled automatically in wp-config.php)
@@ -23,4 +23,14 @@ By default it uses a self-signed SSL certificate. We don't need a letsencrypt ce
 
 This image includes [wp-cli](https://wp-cli.org/) which can be used like this:
 
-    docker exec <your container name> /usr/local/bin/wp --path=/usr/src/wordpress <your command>
+```sh
+docker exec <your container name> wp <your command>
+```
+
+## Local testing
+
+```sh
+docker compose -f ./docker-compose.local.yml up --build
+```
+
+Go to <http://localhost:8081>

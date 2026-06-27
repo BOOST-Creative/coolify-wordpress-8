@@ -132,7 +132,7 @@ if [ ${#PLUGINS_TO_INSTALL[@]} -gt 0 ]; then
 fi
 
 # auto setup w3 total cache
-if [ "$REDIS_HOST" ] && [[ ! -f "/usr/src/wordpress/.w3tc-configured" ]]; then
+if [[ ! -f "/usr/src/wordpress/.w3tc-configured" ]]; then
   if wp --path=/usr/src/wordpress plugin --skip-themes is-active litespeed-cache; then
     wp --path=/usr/src/wordpress plugin --skip-themes --uninstall deactivate litespeed-cache
   fi
@@ -140,13 +140,15 @@ if [ "$REDIS_HOST" ] && [[ ! -f "/usr/src/wordpress/.w3tc-configured" ]]; then
     wp --path=/usr/src/wordpress plugin --skip-themes install --activate w3-total-cache
   fi
   echo "Updating cache options..."
-  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set dbcache.engine "redis"
-  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set objectcache.engine "redis"
-  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set pgcache.engine "redis"
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set pgcache.engine "file_generic"
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set dbcache.engine "apc"
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set objectcache.engine "apc"
 
-  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set dbcache.redis.servers "$REDIS_HOST" --type=array
-  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set objectcache.redis.servers "$REDIS_HOST" --type=array
-  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set pgcache.redis.servers "$REDIS_HOST" --type=array
+  if [ "$REDIS_HOST" ]; then
+    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set dbcache.redis.servers "$REDIS_HOST" --type=array
+    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set objectcache.redis.servers "$REDIS_HOST" --type=array
+    wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set pgcache.redis.servers "$REDIS_HOST" --type=array
+  fi
 
   wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set dbcache.enabled true --type=boolean
   wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set objectcache.enabled true --type=boolean
@@ -158,10 +160,24 @@ if [ "$REDIS_HOST" ] && [[ ! -f "/usr/src/wordpress/.w3tc-configured" ]]; then
   wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set pgcache.lifetime 186400 --type=integer
   wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set browsercache.html.lifetime 180 --type=integer
 
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache fix_environment nginx
+
   # add file to prevent this from running again
   touch /usr/src/wordpress/.w3tc-configured
+  touch /usr/src/wordpress/.w3tc-reconfigured
   # fix permissions
   chown -R nobody: /usr/src/wordpress/
+fi
+
+# Reconfigure w3 total cache if it is active and not on current config
+if [[ ! -f "/usr/src/wordpress/.w3tc-reconfigured" ]] && wp --path=/usr/src/wordpress plugin --skip-themes is-active w3-total-cache; then
+  echo "Reconfiguring cache options..."
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set pgcache.engine "file_generic"
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set dbcache.engine "apc"
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache option set objectcache.engine "apc"
+  wp --path=/usr/src/wordpress --skip-themes w3-total-cache fix_environment nginx
+  mkdir -p /usr/src/wordpress/wp-content/cache/page_enhanced && chown -R nobody: /usr/src/wordpress/wp-content/cache/
+  touch /usr/src/wordpress/.w3tc-reconfigured
 fi
 
 # handle cron
