@@ -37,6 +37,7 @@ RUN apk --no-cache add \
   mariadb-client \
   nginx \
   supervisor \
+  inotify-tools \
   curl \
   bash \
   less \
@@ -56,11 +57,15 @@ COPY config/php.ini /etc/php83/conf.d/zzz_custom.ini
 # Configure supervisord
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-RUN mkdir -p /usr/src/wordpress && chown -R nobody: /usr/src/wordpress
+RUN mkdir -p /usr/src/wordpress /var/log/nginx /var/log/php83 && chown -R nobody: /usr/src/wordpress /var/log/nginx /var/log/php83
 WORKDIR /usr/src/wordpress
 
 # Add WP CLI
 RUN curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x /usr/local/bin/wp
+
+# Nginx restart watcher
+COPY config/watch-wordpress-nginx.sh /usr/local/bin/watch-wordpress-nginx
+RUN chmod +x /usr/local/bin/watch-wordpress-nginx
 
 # Entrypoint to install plugins
 COPY entrypoint.sh /entrypoint.sh
