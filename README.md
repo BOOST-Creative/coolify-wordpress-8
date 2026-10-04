@@ -5,7 +5,7 @@ Uses MariaDB 11 connected via unix socket. Cache is set up automatically with W3
 This is meant to be easy to deploy with Coolify (using Caddy proxy) and uses Coolify's automatically generated env vars to configure credentials. However it can be used without Coolify.
 
 - May use existing wordpress files (installs fresh copy if no files found)
-- Healthcheck runs wp-cron (disabled automatically in wp-config.php)
+- Healthcheck runs wp-cron (disabled automatically in wp-config.php). Plugins are loaded by default; set `WP_CRON_SKIP_PLUGINS=true` on sites where a plugin throws errors under WP-CLI (plugin cron events will not run on those sites)
 - Allows cron commands to be specified
 - Allows installation of user specified plugins at run time
 - Auto database import on first run if db is empty and sql file exists in `/usr/src/wordpress/`
