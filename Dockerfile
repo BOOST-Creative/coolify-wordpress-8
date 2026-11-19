@@ -33,7 +33,7 @@ RUN apk --no-cache add \
   php85-sqlite3 \
   php85-pecl-apcu \
   mariadb-client \
-  nginx \
+  'nginx>=1.30.7-r0' \
   supervisor \
   inotify-tools \
   curl \
