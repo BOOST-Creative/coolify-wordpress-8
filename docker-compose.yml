@@ -7,6 +7,7 @@ services:
       - caddy_0.1_import=wordpress_rate_limit
       # Change TLS here (remove to generate signed certificate)
       - caddy_0.2_tls=internal
+      - caddy_0.header=-Server
       - caddy_0.reverse_proxy={{upstreams 80}}
       - caddy_0.reverse_proxy.0_header_up=X-Real-IP {client_ip}
       - caddy_0.reverse_proxy.1_header_up=X-Forwarded-For {client_ip}
