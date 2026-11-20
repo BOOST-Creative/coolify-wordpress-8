@@ -2,7 +2,7 @@ FROM alpine:3.24
 
 # Install packages
 RUN apk --no-cache add \
-  php85 \
+  'php85>=8.5.13-r0' \
   php85-fpm \
   php85-mysqli \
   php85-json \
